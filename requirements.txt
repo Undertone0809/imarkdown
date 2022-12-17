@@ -1,0 +1,3 @@
+oss2
+requests
+pyyaml
