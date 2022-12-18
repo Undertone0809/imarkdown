@@ -1,7 +1,7 @@
 # md-img-converter
 md-img-converter helps you convert the images address in markdown to the address of the specified graph bed.
 
-> 因为语雀转markdown的时候图片存在防外链行为，如果想要把转出的markdown发表在其他平台，就需要把md中所有的图片地址改成没有放外链的地址，这样子才可以让别人正常查看。该项目旨在解决这个问题，提供了一个可以批量转换markdown中的图片链接为自己的图床的链接的转换器，并重写成一个新的md文件。您只需要修改yaml配置就可以直接运行。
+> 因为语雀转markdown的时候图片存在防外链行为，如果想要把转出的markdown发表在其他平台，就需要把md中所有的图片地址改成没有放外链的地址，这样子才可以让别人正常查看。该项目旨在解决这个问题，提供了一个可以批量转换markdown中的图片链接为自己的图床的链接的转换器，并生成一个转换后的md文件。您只需要修改yaml配置就可以直接运行。
 
 ## Feature
 - download all images of markdown
@@ -10,9 +10,9 @@ md-img-converter helps you convert the images address in markdown to the address
 - generate a new markdown by your graph bed url.
 
 > - 批量下载markdown中所有的图片
-> - 上传markdown的图片到你的图床中
-> - 转换你的markdown图像在原始url到您的图形床url。
-> - 生成一个新的markdown文件，里面的图片链接都来自你的图床。
+> - 上传markdown的图片到你的图床
+> - 将你原来的图片链接转换成你的图床链接
+> - 生成一个新的markdown文件，里面的图片链接都来自你的图床
 
 ## Attention
 
@@ -25,7 +25,7 @@ md-img-converter helps you convert the images address in markdown to the address
 ## Usage
 > Attention: Your python version must be 3.6 if you want to use aliyun graph bed of oss2. Because oss2 only supports python 3.6 at most.
 
-> 注意:如果你想使用oss2的阿里云图床，你的python版本必须是3.6。因为oss2最多只支持python 3.6。
+> 注意:如果你想用阿里云的图床，你的python版本必须是3.6。因为oss2最多只支持python 3.6。
 1. pip
 
 ```sh
@@ -69,7 +69,7 @@ New file name is `yourfilename_converted.md`.
 - [ ] support pypi more easier to operate
 
 
-## How to write other graph bed?
+## How to extend other graph bed?
 If you want to develop other graph bed, the only thing you need to do is just implement the adapter like `AliyunApater`. Moreover, you need to config `config.yaml`.That's all you need to do. Actually, I've wrapped it so it's easy to extend. 
 
 
