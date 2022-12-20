@@ -2,6 +2,7 @@ import os
 import time
 import requests
 import logging
+import random
 from adapter import *
 
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ def _download_img(url: str):
         if not os.path.exists(img_dir):
             os.mkdir(img_dir)
 
-        file_dir = img_dir + nowtime + '.png'
+        file_dir = f"{img_dir}{nowtime}{random.randint(1000, 10000)}.png"
         with open(file_dir, "wb") as f:
             f.write(res.content)
         logger.info(f"filename: {file_dir} has stored successfully")
