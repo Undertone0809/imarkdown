@@ -3,11 +3,11 @@ import yaml_service
 
 
 class Adapter:
-    name = ''
     """
     You can implement Adapter to realize third-party 
     graph bed. For more details, you can see AliyunAdapter.
     """
+    name = ''
 
     def upload(self, *args, **kwargs):
         pass
@@ -24,7 +24,6 @@ class AliyunAdapter(Adapter):
 
     def __init__(self):
         """ init some aliyun oss config, you should config in config.yaml """
-        name = 'Aliyun'
         config = yaml_service.get_adapter_config()
         self.access_key_id = config["access_key_id"]
         self.access_key_secret = config["access_key_secret"]
