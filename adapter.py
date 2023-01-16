@@ -1,7 +1,9 @@
 import oss2
 import yaml_service
 
+
 class Adapter:
+    name = ''
     """
     You can implement Adapter to realize third-party 
     graph bed. For more details, you can see AliyunAdapter.
@@ -17,10 +19,12 @@ class Adapter:
         pass
 
 
-class AliyunApater(Adapter):
+class AliyunAdapter(Adapter):
+    name = 'Aliyun'
 
     def __init__(self):
         """ init some aliyun oss config, you should config in config.yaml """
+        name = 'Aliyun'
         config = yaml_service.get_adapter_config()
         self.access_key_id = config["access_key_id"]
         self.access_key_secret = config["access_key_secret"]
@@ -39,3 +43,20 @@ class AliyunApater(Adapter):
     def get_url(self, key):
         url = f"http://{self.bucket_name}.oss-cn-{self.place}.aliyuncs.com/{key}"
         return url
+
+
+class LocalAdapter(Adapter):
+    name = 'Local'
+
+    def upload(self, key, file):
+        pass
+
+    def delete(self, key):
+        pass
+
+    def get_url(self, key):
+        url = f"/images/{key}"
+        return url
+
+
+ADAPTER_ENUM = [LocalAdapter.name, AliyunAdapter.name]
