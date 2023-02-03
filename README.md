@@ -53,7 +53,7 @@ Aliyun:
 ```yaml
 # 需要转换的markdown文件
 file_path: "test.md"
-# 适配器选择，如果你想转换成你的阿里云图床
+# 选择本地适配器，img路径将切换为本地路径
 adapter: "Local"
 ```
 
