@@ -1,7 +1,7 @@
 import logging
 
 from adapter import *
-from coverter import Coverter
+from converter import Converter
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
@@ -33,8 +33,8 @@ class Application:
             self.adapter = LocalAdapter()
 
     def run(self):
-        coverter = Coverter(self.adapter)
-        coverter.covert(self.file_path)
+        converter = Converter(self.adapter)
+        converter.convert(self.file_path)
 
 
 def main():

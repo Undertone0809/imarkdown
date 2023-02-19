@@ -8,8 +8,14 @@ ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
 def yaml_check():
     """ check some yaml arguments. """
     # check file_path
-    with open(f"{get_file_path()}", 'r') as f:
+    path = get_file_path()
+    if os.path.isfile(path):
+        f = open(path, 'r')
+        f.close()
+    elif os.path.isdir(path):
         pass
+    else:
+        raise ValueError("file_path is not a file nor a directory")
     # check adapter
     if get_adapter_type() not in adapter.ADAPTER_ENUM:
         raise ValueError("Please check your yaml adapter config")

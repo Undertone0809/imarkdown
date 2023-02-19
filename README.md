@@ -51,7 +51,7 @@ Aliyun:
 - 如果你想要保存到本地
 
 ```yaml
-# 需要转换的markdown文件
+# 需要转换的markdown文件或者包含markdown文件的目录
 file_path: "test.md"
 # 选择本地适配器，img路径将切换为本地路径
 adapter: "Local"
@@ -67,7 +67,7 @@ python main.py
 
 4. 生成转换后的文件
 
-- 运行程序后，转换md图片链接后的文件名为 `yourfilename_converted.md`.
+- 运行程序后，转换md图片链接后的文件名为 `yourfilename_converted.md`. 如果转换的是目录，则会以原文件名的方式保存在`<yaml_file_path>_converted_<hashcode>`文件夹下
 
 > 如果你选择保存在本地，那么图片将保存在`images`中，在markdown中以相对路径的方式存在，因此你在移动markdown文件的时候要把对应的`images`文件一起copy走。 没有人想把它作为绝对路径，因此我并没有设置本地绝对路径的功能实现，如果你有这样的需求，欢迎pr。
 
@@ -83,7 +83,7 @@ Actually，没有技术什么框架，但还是简单的放一个架构图吧，
 ## 待办
 - [ ] 支持更多类型的图床
 - [ ] 完善单元测试
-- [ ] 支持批量文件修改
+- [x] 支持批量文件修改
 - [ ] 支持大图片压缩
 - [ ] 支持用yaml自定义文件名、
 - [ ] 支持命令行
