@@ -57,6 +57,7 @@ file_path: "test.md"
 adapter: "Local"
 ```
 
+
 3. 运行程序
    
 - 您唯一需要做的就是运行下面的命令。
@@ -74,8 +75,8 @@ python main.py
 ## 技术框架
 Actually，没有技术什么框架，但还是简单的放一个架构图吧，如果你只想要使用，则无需理会，如果你想要扩展其他图床，可以看一下。
 
-- `Apapter` Adapter决定了Coverter要将图片链接转成本地、阿里云图床还是其他图床，如果你想要开发扩展其他图床，你只需要继承一个`Apapter`类，实现`Apapter`中的三个方法，并在`ADAPTER_ENUM`中添加图床的名称即可
-- `Coverter` 核心部件，输入file_path和一些策略，可以利用Coveter去批量修改markdown中的内容，如果你想要扩展图床，则Coveter不需要修改
+- `Apapter` Adapter决定了Converter要将图片链接转成本地、阿里云图床还是其他图床，如果你想要开发扩展其他图床，你只需要继承一个`Apapter`类，实现`Apapter`中的三个方法，并在`ADAPTER_ENUM`中添加图床的名称即可
+- `Converter` 核心部件，输入file_path和一些策略，可以利用Converter去批量修改markdown中的内容，如果你想要扩展图床，则Converter不需要修改
 - `YamlConfig` config.yaml的内容用`yaml_service.py`封装了一下，用于读取一些配置信息，具体配置方法参考[快速上手](#快速上手)
 
 <img src="https://zeeland-bucket.oss-cn-beijing.aliyuncs.com/typora_img/20230116180115.png"/>
