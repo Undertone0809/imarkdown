@@ -13,17 +13,18 @@ class Converter:
 
     def __init__(self, adapter: Optional[Adapter] = None) -> None:
         """
-        When you initialize a Coverter, you need choose a adapter.If you choose 
+        When you initialize a converter, you need choose an adapter.If you choose
         Aliyun adapter, it means that the image link will be converted to Aliyun link.
 
 
         Args:
             adapter (Adapter, optional): Defaults is None. It means that your image link
-            will be coverted to local link.
+            will be converted to local link.
         """
         self.adapter = adapter
         self._convert_mode = 'file'
         self._converted_path = ''
+        self.newfile = ""
 
     def convert(self, file_or_dir_path: str):
         self._converted_path = file_or_dir_path
@@ -38,8 +39,10 @@ class Converter:
     def _convert_file(self, file_path: str):
         """
         input a markdown file path, this function will replace img address
-        attention: markdown image must be a website url ranther than a file path.
+        attention: markdown image must be a website url rather than a file path.
         """
+        self.newfile = "\\".join(file_path.split("\\")[:-1])
+        print("newfile1: ", self.newfile)
 
         ori_data = self._read_md(file_path)
         pre_data = self._find_img_and_replace(ori_data)
@@ -47,9 +50,13 @@ class Converter:
         logger.info("task end")
 
     def _convert_dir(self, dir_path: str):
+
         """
         input a directory path, this function will recursively convert all markdown files in sub folders.
         """
+        self.newfile = "\\".join(dir_path.split("\\")[:-1])
+        print("newfile2: ", self.newfile)
+
         new_dir_path = dir_path + "_converted_" + str(hash(self))[0:8]
         shutil.copytree(dir_path, new_dir_path)
 
@@ -77,8 +84,8 @@ class Converter:
 
     def _replace_url(self, md_str: str, origin_image_url: str) -> str:
         """ replace single image address """
-        new_image_url = image_service.get_new_url(
-            origin_image_url, adapter=self.adapter)
+        new_image_url = image_service.get_new_url(self.newfile,
+                                                  origin_image_url, adapter=self.adapter)
         md_str = md_str.replace(origin_image_url, new_image_url)
         return md_str
 
