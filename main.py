@@ -14,13 +14,13 @@ class Application:
     in markdown to the address of the specified graph bed.
 
     Attention:
-        1.All your markdown images must be a website url ranther than a file path.
+        1.All your markdown images must be a website url rather than a file path.
         2.Now only support aliyun-oss and local. Welcome PRs to add more supports.
     """
 
     def __init__(self) -> None:
         """
-        initialize application and read coverter strategy from config.yaml
+        initialize application and read converter strategy from config.yaml
         """
         yaml_service.yaml_check()
         self.file_path = yaml_service.get_file_path()

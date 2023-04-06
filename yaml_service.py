@@ -47,6 +47,6 @@ def get_adapter_type() -> str:
 
 
 def get_adapter_config() -> dict:
-    """ It need to append more chooses if add more graph bed """
+    """ It needs to append more chooses if add more graph bed """
     if get_adapter_type() in adapter.ADAPTER_ENUM and get_adapter_type() is not "local":
         return yaml_dict()[get_adapter_type()]
