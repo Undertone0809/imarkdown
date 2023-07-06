@@ -5,6 +5,7 @@ from pydantic import root_validator, validator
 
 from imarkdown.adapter.base import BaseMdAdapter
 from imarkdown.config import IMarkdownConfig
+from imarkdown.utils import polish_path
 
 logger = logging.getLogger(__name__)
 cfg: IMarkdownConfig = IMarkdownConfig()
@@ -16,8 +17,6 @@ class AliyunAdapter(BaseMdAdapter):
     """You can use https image url if you set true, otherwise http."""
     url_prefix: str = "https"
     """Used in request url prefix"""
-    path_prefix: str = ""
-    """Image path file prefix of in bucket. Final key is `{path_prefix}/{key}`"""
     access_key_id: str
     """Necessary parameter when initialization."""
     access_key_secret: str
@@ -73,7 +72,8 @@ class AliyunAdapter(BaseMdAdapter):
         return v
 
     def upload(self, key: str, file):
-        self.bucket.put_object(f"{self.path_prefix}/{key}", file)
+        path = polish_path(f"{self.path_prefix}/{key}", enable_suffix=False)
+        self.bucket.put_object(path, file)
 
     def get_replaced_url(self, key):
         return f"{self.url_prefix}://{self.bucket_name}.oss-cn-{self.place}.aliyuncs.com/{self.path_prefix}/{key}"

@@ -7,7 +7,7 @@ class BaseMdAdapter(BaseModel):
     name: str
     """Adapter name"""
     path_prefix: str = ""
-    """Image path file prefix of in bucket. Final key is `{path_prefix}/{key}`"""
+    """Image path file prefix. Final image name is `{path_prefix}/{key}`"""
 
     class Config:
         arbitrary_types_allowed = True
