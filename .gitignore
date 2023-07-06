@@ -2,6 +2,7 @@ command
 md/
 images/
 my_config.yaml
+private
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

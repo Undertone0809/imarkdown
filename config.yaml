@@ -1,8 +1,0 @@
-file_path: "test.md"
-adapter: "Aliyun"
-save_image: True
-Aliyun:
-  access_key_id: "your key"
-  access_key_secret: "your key secret"
-  bucket_name: "your bucket"
-  place: "beijing"

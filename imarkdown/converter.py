@@ -72,7 +72,6 @@ class MdConverter(BaseModel):
     enable_save_images: bool = True
     convert_mode: str = "file"
     newfile: str = ""
-    local_image_path: str = ""
 
     @root_validator(pre=True)
     def data_check(cls, values: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
@@ -195,7 +194,6 @@ class MdConverter(BaseModel):
         file_path = f"{file_path}/{self.adapter.path_prefix}"
         if self.adapter.path_prefix == "":
             file_path = f"{file_path}/images"
-        self.local_image_path = f"{file_path}/images"
         img_path = _download_img(file_path, original_image_url)
         new_url = None
 
