@@ -9,4 +9,7 @@ class LocalFileAdapter(BaseMdAdapter):
         pass
 
     def get_replaced_url(self, key):
-        return f"./{self.path_prefix}/{key}"
+        path = f"./{self.path_prefix}/{key}"
+        if self.path_prefix == "":
+            path = f"./images/{key}"
+        return path
