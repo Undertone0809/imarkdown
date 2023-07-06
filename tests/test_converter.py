@@ -1,10 +1,8 @@
 import logging
 from unittest import TestCase
 
-from imarkdown.adapter import (
-    AliyunAdapter,
-    MdAdapterType,
-)
+from imarkdown.adapter import AliyunAdapter
+from imarkdown.constant import MdAdapterType
 from imarkdown.converter import MdConverter, supplementary_file_path
 
 logging.basicConfig(level=logging.DEBUG)
