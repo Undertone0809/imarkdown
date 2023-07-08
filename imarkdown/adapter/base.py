@@ -6,8 +6,8 @@ from pydantic import BaseModel
 class BaseMdAdapter(BaseModel):
     name: str
     """Adapter name"""
-    path_prefix: str = ""
-    """Image path file prefix. Final image name is `{path_prefix}/{key}`"""
+    storage_path_prefix: str = ""
+    """Image path file prefix. Final image name is `{storage_path_prefix}/{key}`"""
 
     class Config:
         arbitrary_types_allowed = True

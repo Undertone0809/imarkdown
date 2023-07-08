@@ -2,7 +2,7 @@ import logging
 from unittest import TestCase
 
 from imarkdown.adapter import AliyunAdapter, LocalFileAdapter
-from imarkdown.converter import MdImageConverter, MdFile
+from imarkdown.converter import MdImageConverter
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -23,10 +23,9 @@ class TestLocalFileAdapter(TestCase):
         adapter = LocalFileAdapter()
         md_converter = MdImageConverter(adapter=adapter)
         md_converter.convert("test.md")
-        MdFile()
 
     def test_convert_file(self):
-        adapter = LocalFileAdapter(storage_path_prefix="images")
+        adapter = LocalFileAdapter(storage_path_prefix="img")
         md_converter = MdImageConverter(adapter=adapter)
         md_converter.convert("mds")
 
