@@ -1,4 +1,4 @@
-from imarkdown import MdConverter
+from imarkdown import MdImageConverter
 from imarkdown.adapter import BaseMdAdapter
 
 
@@ -8,7 +8,7 @@ class CustomMdAdapter(BaseMdAdapter):
 
 def main():
     adapter = CustomMdAdapter()
-    md_converter = MdConverter(adapter=adapter)
+    md_converter = MdImageConverter(adapter=adapter)
     md_converter.convert("markdown.md")
 
 

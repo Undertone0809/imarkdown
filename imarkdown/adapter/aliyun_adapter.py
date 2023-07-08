@@ -72,8 +72,8 @@ class AliyunAdapter(BaseMdAdapter):
         return v
 
     def upload(self, key: str, file):
-        path = polish_path(f"{self.path_prefix}/{key}", enable_suffix=False)
+        path = polish_path(f"{self.storage_path_prefix}/{key}", enable_suffix=False)
         self.bucket.put_object(path, file)
 
     def get_replaced_url(self, key):
-        return f"{self.url_prefix}://{self.bucket_name}.oss-cn-{self.place}.aliyuncs.com/{self.path_prefix}/{key}"
+        return f"{self.url_prefix}://{self.bucket_name}.oss-cn-{self.place}.aliyuncs.com/{self.storage_path_prefix}/{key}"
