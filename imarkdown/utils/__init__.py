@@ -35,6 +35,7 @@ def supplementary_file_path(file_path: str) -> str:
 
 
 def get_file_name_from_relative_path(relative_path: str) -> str:
+    """Get file name, image name, markdown name from relative path."""
     if relative_path.startswith("../"):
         while relative_path.startswith("../"):
             relative_path = relative_path[3:]
@@ -51,21 +52,22 @@ def convert_backslashes(path):
 def calculate_relative_path(image_path, md_directory):
     image_path = os.path.abspath(image_path)
     md_directory = os.path.abspath(md_directory)
+
     image_parts = image_path.split(os.path.sep)
     md_parts = md_directory.split(os.path.sep)
+    if not os.path.isdir(md_directory):
+        md_parts = md_parts[:-1]
 
-    common_index = 0
-    for i in range(min(len(image_parts), len(md_parts))):
-        if image_parts[i] != md_parts[i]:
-            break
-        common_index += 1
+    common_parts = os.path.commonpath([image_path, md_directory])
+    common_index = len(common_parts.split(os.path.sep))
 
     relative_parts = []
     if common_index == len(md_parts):
         relative_parts.append(".")
     else:
-        relative_parts.extend([".."] * (len(md_parts) - common_index - 1))
+        relative_parts.extend([".."] * (len(md_parts) - common_index))
 
     relative_parts.extend(image_parts[common_index:])
+
     relative_path = os.path.join(*relative_parts)
     return convert_backslashes(relative_path)

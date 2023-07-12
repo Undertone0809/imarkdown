@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Any, Dict
 
-from pydantic import root_validator, validator
+from pydantic import root_validator
 
 from imarkdown.adapter.base import BaseMdAdapter
 from imarkdown.config import IMarkdownConfig
@@ -31,10 +31,15 @@ class AliyunAdapter(BaseMdAdapter):
 
     @root_validator(pre=True)
     def validate_environment(cls, values: Optional[Dict]) -> Dict:
-        if values:
-            cfg.store_variable(cls.__name__, values)
-        else:
-            values: Dict = cfg.load_variable(cls.__name__)
+        env_config: Dict[str, Any] = cfg.load_variable(cls.__name__)
+        if env_config:
+            if not values:
+                values = {}
+            for env_key in env_config.keys():
+                if env_key not in values:
+                    values.update({env_key: env_config[env_key]})
+        cfg.store_variable(cls.__name__, values)
+
         if not values:
             raise ValueError("Please initialize your AliyunAdapter with parameters.")
         logger.debug(f"[imarkdown aliyun adapter] params: {values}")
@@ -56,8 +61,7 @@ class AliyunAdapter(BaseMdAdapter):
             )
         return values
 
-    @validator("enable_https")
-    def update_url_prefix(cls, v: bool, values: Dict[str, Any]) -> bool:
+    def set_enable_https(cls, v: bool, values: Dict[str, Any]) -> bool:
         import oss2
 
         if v:

@@ -1,24 +1,55 @@
 import glob
+import logging
 import os
 from typing import List, Optional, Any, Dict, Union
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, root_validator, validator
 from typing_extensions import Literal
 
 from imarkdown.utils import supplementary_file_path, convert_backslashes
 
+logger = logging.getLogger(__name__)
 
-class MdFile(BaseModel):
+
+class BaseMdMedium(BaseModel):
     name: str
-    """markdown file name"""
-    absolute_path: str
-    """absolute path of markdown file"""
+    """markdown medium name"""
     absolute_path_name: str
     """path + name"""
-    image_path: Optional[str] = None
+    image_directory: Optional[str] = None
     """image storage path if it exists"""
     image_type: Literal["local", "remote"] = "remote"
     type: Literal["original", "converted"] = "original"
+    output_directory: Optional[str] = None
+    enable_save_images: bool = True
+    enable_rename: bool = True
+    root_directory: Optional[str] = None
+
+
+class MdFile(BaseMdMedium):
+    absolute_path: str
+    """absolute path of markdown file"""
+
+    def update_config(self, **kwargs):
+        if "output_directory" in kwargs and kwargs["output_directory"]:
+            self.output_directory = supplementary_file_path(kwargs["output_directory"])
+            if self.image_type != "local":
+                self.image_directory = f"{self.output_directory}/images"
+
+            self.output_directory = self.absolute_path.replace(
+                self.root_directory, self.output_directory
+            )
+
+        if "image_directory" in kwargs and kwargs["image_directory"]:
+            self.image_directory = supplementary_file_path(kwargs["image_directory"])
+
+        if "enable_save_images" in kwargs:
+            self.enable_save_images = kwargs["enable_save_images"]
+        if "enable_rename" in kwargs:
+            self.enable_rename = kwargs["enable_rename"]
+
+        os.makedirs(self.output_directory, exist_ok=True)
+        os.makedirs(self.image_directory, exist_ok=True)
 
     @root_validator(pre=True)
     def variables_check(cls, values: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -33,21 +64,49 @@ class MdFile(BaseModel):
         values["absolute_path"] = "/".join(values["absolute_path_name"].split("/")[:-1])
         if "image_type" in values and values["image_type"] == "local":
             assert (
-                "image_path" in values and values["image_path"]
-            ), "If image_type is local, then image_path is necessary."
-            values["image_path"] = supplementary_file_path(values["image_path"])
+                "image_directory" in values and values["image_directory"]
+            ), "If image_type is local, then image_directory is necessary."
+            values["image_directory"] = supplementary_file_path(
+                values["image_directory"]
+            )
+        else:
+            # set default image_directory if image_type == remote
+            if "image_directory" not in values or not values["image_directory"]:
+                values["image_directory"] = f"{values['absolute_path']}/images"
+
+        if "output_directory" not in values:
+            values["output_directory"] = values["absolute_path"]
+        os.makedirs(values["output_directory"], exist_ok=True)
         return values
 
+    @validator("enable_save_images", always=True)
+    def update_enable_save_images(
+        cls, enable_save_images: bool, values: Dict[str, Any]
+    ) -> bool:
+        if values["image_type"] == "local" and not enable_save_images:
+            raise ValueError(
+                "You can not set enable_save_images = False if you original markdown file image is local url."
+            )
+        return enable_save_images
 
-class MdFolder(BaseModel):
-    name: str
-    """folder name"""
-    absolute_path_name: str
+    @property
+    def to_convert_params(self) -> Dict[str, Any]:
+        params = {
+            "md_file_path": self.name,
+            "enable_rename": self.enable_rename,
+            "output_md_directory": self.output_directory,
+            "image_local_storage_directory": self.image_directory,
+            "is_local_images": True if self.image_type == "local" else False,
+            "enable_save_images": self.enable_save_images,
+        }
+        logger.debug(f"[imarkdown] MdFile convert params {params}")
+        return params
+
+
+class MdFolder(BaseMdMedium):
     sub_nodes: List[Union[MdFile, "MdFolder"]] = []
     """Current folder dir or markdown file, it contains list of MdFile and MdFolder instances."""
-    image_path: Optional[str] = None
-    image_type: Literal["local", "remote"] = "remote"
-    type: Literal["original", "converted"] = "original"
+    is_root: bool = False
     enable_keep_original_file_status: bool = False
     """todo not finish
     There are a pure markdown folder will be created if MdImageConverter convert MdFolder. But
@@ -63,19 +122,46 @@ class MdFolder(BaseModel):
             values["absolute_path_name"]
         ), f'<{values["absolute_path_name"]}> file is not dir.'
 
-        md_initialization_params = {"image_type": "remote", "type": "original"}
+        md_initialization_params = {
+            "image_type": "remote",
+            "type": "original",
+            "is_root": False,
+        }
 
         values["name"] = values["absolute_path_name"].split("/")[-1]
         if "image_type" in values and values["image_type"] == "local":
             assert (
-                "image_path" in values and values["image_path"]
-            ), "If image_type is local, then image_path is necessary."
-            values["image_path"] = supplementary_file_path(values["image_path"])
+                "image_directory" in values and values["image_directory"]
+            ), "If image_type is local, then image_directory is necessary."
             md_initialization_params["image_type"] = values["image_type"]
-            md_initialization_params["image_path"] = values["image_path"]
 
         if "type" in values and values["type"]:
             md_initialization_params["type"] = values["type"]
+
+        if "output_directory" not in values:
+            values["output_directory"] = values["absolute_path_name"]
+        values["output_directory"] = supplementary_file_path(values["output_directory"])
+        md_initialization_params["output_directory"] = values["output_directory"]
+        os.makedirs(values["output_directory"], exist_ok=True)
+
+        if "image_directory" in values and values["image_directory"]:
+            values["image_directory"] = supplementary_file_path(
+                values["image_directory"]
+            )
+        else:
+            values["image_directory"] = f'{values["output_directory"]}/images'
+        md_initialization_params["image_directory"] = values["image_directory"]
+
+        if "root_directory" not in values:
+            values["root_directory"] = values["output_directory"]
+
+        if "is_root" in values and values["is_root"]:
+            md_initialization_params["root_directory"] = values["output_directory"]
+        else:
+            md_initialization_params["root_directory"] = values["root_directory"]
+
+        if "enable_rename" in values and values["enable_rename"]:
+            md_initialization_params["enable_rename"] = values["enable_rename"]
 
         # build sub nodes
         values["sub_nodes"] = []
@@ -90,39 +176,72 @@ class MdFolder(BaseModel):
                 values["sub_nodes"].append(
                     MdFile(name=sub_file, **md_initialization_params)
                 )
+
         return values
 
 
-class MdMediumManager(BaseModel):
-    mediums: List[Union[MdFile, MdFolder]]
-    _md_files: List[MdFile] = []
+def _find_all_md_files(md_mediums: List[Union[MdFile, MdFolder]]) -> List[MdFile]:
+    def find_sub_files(md_folder: MdFolder):
+        for sub_node in md_folder.sub_nodes:
+            if isinstance(sub_node, MdFile):
+                _cur_md_files.append(sub_node)
+            elif isinstance(sub_node, MdFolder):
+                find_sub_files(sub_node)
 
-    @property
-    def is_all_finished(self) -> bool:
-        """Check if all md_file has completed the convert."""
+    _cur_md_files: List[MdFile] = []
+    for medium in md_mediums:
+        if isinstance(medium, MdFile):
+            _cur_md_files.append(medium)
+        elif isinstance(medium, MdFolder):
+            find_sub_files(medium)
+    return _cur_md_files
+
+
+class MdMediumManager(BaseModel):
+    _md_files: List[MdFile] = []
+    output_directory: Optional[str] = None
+    enable_save_images: bool = True
+    additional_kwargs: Optional[Dict[str, Any]] = None
+
+    def update_config(
+        self,
+        output_directory: Optional[str] = None,
+        enable_save_images: bool = True,
+        **kwargs,
+    ):
+        if not self._md_files:
+            ValueError("Please run generate_md_files firstly.")
         for md_file in self._md_files:
-            if md_file.type == "original":
-                return False
-        return True
+            params = {
+                "output_directory": output_directory,
+                "enable_save_images": enable_save_images,
+            }
+            if output_directory:
+                params.update({"enable_rename": False})
+
+            md_file.update_config(**params, **kwargs)
+
+    def init_md_files(
+        self,
+        md_mediums: List[Union[MdFile, MdFolder]],
+    ) -> List[MdFile]:
+        def find_sub_files(md_folder: MdFolder):
+            for sub_node in md_folder.sub_nodes:
+                if isinstance(sub_node, MdFile):
+                    self._md_files.append(sub_node)
+                elif isinstance(sub_node, MdFolder):
+                    find_sub_files(sub_node)
+
+        for medium in md_mediums:
+            if isinstance(medium, MdFile):
+                self._md_files.append(medium)
+            elif isinstance(medium, MdFolder):
+                find_sub_files(medium)
+        return self._md_files
 
     @property
     def md_files(self) -> List[MdFile]:
         """MdFolder may contain several MdFile. This attribute will find all MdFile in mediums."""
-
-        def find_sub_files(md_folder: MdFolder):
-            for sub_node in md_folder.sub_nodes:
-                if isinstance(sub_node, MdFile):
-                    _cur_md_files.append(sub_node)
-                elif isinstance(sub_node, MdFolder):
-                    find_sub_files(sub_node)
-
         if self._md_files:
             return self._md_files
-
-        _cur_md_files: List[MdFile] = []
-        for medium in self.mediums:
-            if isinstance(medium, MdFile):
-                _cur_md_files.append(medium)
-            elif isinstance(medium, MdFolder):
-                find_sub_files(medium)
-        return _cur_md_files
+        raise ValueError("Please run generate_md_files firstly.")
