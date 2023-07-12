@@ -71,3 +71,21 @@ def calculate_relative_path(image_path, md_directory):
 
     relative_path = os.path.join(*relative_parts)
     return convert_backslashes(relative_path)
+
+
+def exist_markdown_file(path: str) -> bool:
+    """Determine whether there are markdown file in the folder directory.
+
+    Args:
+        path: folder absolute path
+
+    Returns:
+        True means existence, False otherwise.
+    """
+    if path.endswith(".md"):
+        return True
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if file.endswith(".md"):
+                return True
+    return False

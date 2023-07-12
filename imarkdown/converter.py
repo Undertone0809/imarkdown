@@ -265,7 +265,7 @@ class BaseMdImageConverter(BaseModel):
         if not self.enable_save_images:
             os.remove(converted_image_path)
         if not converted_url:
-            raise Exception(f"<{converted_url}> try to get new url but return None.")
+            raise Exception(f"<{original_image_url}> try to get new url but return None.")
         return converted_url
 
 

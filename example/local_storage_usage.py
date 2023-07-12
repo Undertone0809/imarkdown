@@ -1,11 +1,11 @@
-from imarkdown import MdImageConverter
-from imarkdown.adapter import LocalFileAdapter
+from imarkdown import MdImageConverter, LocalFileAdapter, MdFile
 
 
 def main():
     adapter = LocalFileAdapter()
     md_converter = MdImageConverter(adapter=adapter)
-    md_converter.convert("markdown.md")
+    md_file = MdFile(name="markdown.md")
+    md_converter.convert(md_file)
 
 
 if __name__ == "__main__":

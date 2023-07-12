@@ -27,8 +27,8 @@ class IMarkdownConfig(metaclass=Singleton):
 
     @last_adapter_name.setter
     def last_adapter_name(self, value: str):
-        if value not in _MdAdapterType.keys():
-            raise ValueError(f"<{value}> type adapter not exist.")
+        # if value not in _MdAdapterType.keys():
+        #     raise ValueError(f"<{value}> type adapter not exist.")
         self.cache["last_adapter"] = value
 
     def load_variable(self, key: str) -> Any:
