@@ -1,5 +1,4 @@
-from imarkdown import MdImageConverter
-from imarkdown.adapter import AliyunAdapter
+from imarkdown import MdImageConverter, AliyunAdapter, MdFile
 
 
 def main():
@@ -12,7 +11,8 @@ def main():
     }
     adapter = AliyunAdapter(**aliyun_config)
     md_converter = MdImageConverter(adapter=adapter)
-    md_converter.convert("markdown.md")
+    md_file = MdFile(name="markdown.md")
+    md_converter.convert(md_file)
 
 
 if __name__ == "__main__":

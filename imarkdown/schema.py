@@ -6,7 +6,11 @@ from typing import List, Optional, Any, Dict, Union
 from pydantic import BaseModel, root_validator, validator
 from typing_extensions import Literal
 
-from imarkdown.utils import supplementary_file_path, convert_backslashes
+from imarkdown.utils import (
+    supplementary_file_path,
+    convert_backslashes,
+    exist_markdown_file,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -169,6 +173,8 @@ class MdFolder(BaseMdMedium):
         values["sub_nodes"] = []
         sub_files = glob.glob(os.path.join(values["absolute_path_name"], "*"))
         for sub_file in sub_files:
+            if not exist_markdown_file(sub_file):
+                continue
             sub_file = convert_backslashes(sub_file)
             if os.path.isdir(sub_file):
                 values["sub_nodes"].append(
@@ -180,23 +186,6 @@ class MdFolder(BaseMdMedium):
                 )
 
         return values
-
-
-def _find_all_md_files(md_mediums: List[Union[MdFile, MdFolder]]) -> List[MdFile]:
-    def find_sub_files(md_folder: MdFolder):
-        for sub_node in md_folder.sub_nodes:
-            if isinstance(sub_node, MdFile):
-                _cur_md_files.append(sub_node)
-            elif isinstance(sub_node, MdFolder):
-                find_sub_files(sub_node)
-
-    _cur_md_files: List[MdFile] = []
-    for medium in md_mediums:
-        if isinstance(medium, MdFile):
-            _cur_md_files.append(medium)
-        elif isinstance(medium, MdFolder):
-            find_sub_files(medium)
-    return _cur_md_files
 
 
 class MdMediumManager(BaseModel):

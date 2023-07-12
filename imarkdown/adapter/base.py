@@ -14,7 +14,12 @@ class BaseMdAdapter(BaseModel):
 
     @abstractmethod
     def upload(self, key: str, file):
-        """upload image to Image Server"""
+        """Upload image to Image Server.
+
+        Args:
+            key: image name
+            file: markdown string data
+        """
         raise NotImplementedError("Your adapter should implement `upload` method")
 
     @abstractmethod
