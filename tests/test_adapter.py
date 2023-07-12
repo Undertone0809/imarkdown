@@ -2,7 +2,7 @@ import logging
 from unittest import TestCase
 
 from imarkdown.adapter import AliyunAdapter, LocalFileAdapter
-from imarkdown.converter import MdImageConverter, MdFile
+from imarkdown.converter import MdImageConverter, MdFile, MdFolder
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -22,13 +22,16 @@ class TestLocalFileAdapter(TestCase):
     def test_convert_md_file(self):
         adapter = LocalFileAdapter()
         md_converter = MdImageConverter(adapter=adapter)
-        md_converter.convert("test.md")
-        MdFile()
 
-    def test_convert_file(self):
-        adapter = LocalFileAdapter(storage_path_prefix="images")
+        md_file = MdFile(name="test.md")
+        md_converter.convert(md_file)
+
+    def test_convert_folder(self):
+        adapter = LocalFileAdapter()
         md_converter = MdImageConverter(adapter=adapter)
-        md_converter.convert("mds")
+
+        folder = MdFolder(name="mds")
+        md_converter.convert(folder, output_directory="converted")
 
 
 class TestAliyunAdapter(TestCase):
@@ -38,9 +41,20 @@ class TestAliyunAdapter(TestCase):
     def test_convert_md_file(self):
         adapter = AliyunAdapter()
         md_converter = MdImageConverter(adapter=adapter)
-        md_converter.convert("test.md")
+
+        md_file = MdFile(name="test.md")
+        md_converter.convert(md_file)
+
+    def test_convert_with_storage_prefix(self):
+        adapter = AliyunAdapter(storage_path_prefix="imarkdown")
+        md_converter = MdImageConverter(adapter=adapter)
+
+        md_file = MdFile(name="test.md")
+        md_converter.convert(md_file)
 
     def test_convert_file(self):
         adapter = AliyunAdapter()
         md_converter = MdImageConverter(adapter=adapter)
-        md_converter.convert("mds")
+
+        md_folder = MdFolder(name="mds")
+        md_converter.convert(md_folder, output_directory="converted")
