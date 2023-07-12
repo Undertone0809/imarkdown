@@ -19,6 +19,7 @@ class BaseMdMedium(BaseModel):
     image_directory: Optional[str] = None
     """image storage path if it exists"""
     image_type: Literal["local", "remote"] = "remote"
+    is_default_image_directory: bool = True
     type: Literal["original", "converted"] = "original"
     output_directory: Optional[str] = None
     enable_save_images: bool = True
@@ -33,16 +34,15 @@ class MdFile(BaseMdMedium):
     def update_config(self, **kwargs):
         if "output_directory" in kwargs and kwargs["output_directory"]:
             self.output_directory = supplementary_file_path(kwargs["output_directory"])
-            if self.image_type != "local":
-                self.image_directory = f"{self.output_directory}/images"
-
             self.output_directory = self.absolute_path.replace(
                 self.root_directory, self.output_directory
             )
+            if self.is_default_image_directory:
+                self.image_directory = f"{self.output_directory}/images"
 
         if "image_directory" in kwargs and kwargs["image_directory"]:
             self.image_directory = supplementary_file_path(kwargs["image_directory"])
-
+            self.is_default_image_directory = False
         if "enable_save_images" in kwargs:
             self.enable_save_images = kwargs["enable_save_images"]
         if "enable_rename" in kwargs:
@@ -69,10 +69,12 @@ class MdFile(BaseMdMedium):
             values["image_directory"] = supplementary_file_path(
                 values["image_directory"]
             )
+            values["is_default_image_directory"] = False
         else:
             # set default image_directory if image_type == remote
             if "image_directory" not in values or not values["image_directory"]:
                 values["image_directory"] = f"{values['absolute_path']}/images"
+                values["is_default_image_directory"] = True
 
         if "output_directory" not in values:
             values["output_directory"] = values["absolute_path"]
@@ -207,7 +209,6 @@ class MdMediumManager(BaseModel):
         self,
         output_directory: Optional[str] = None,
         enable_save_images: bool = True,
-        **kwargs,
     ):
         if not self._md_files:
             ValueError("Please run generate_md_files firstly.")
@@ -219,7 +220,7 @@ class MdMediumManager(BaseModel):
             if output_directory:
                 params.update({"enable_rename": False})
 
-            md_file.update_config(**params, **kwargs)
+            md_file.update_config(**params)
 
     def init_md_files(
         self,

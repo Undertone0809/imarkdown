@@ -58,3 +58,14 @@ class TestAliyunAdapter(TestCase):
 
         md_folder = MdFolder(name="mds")
         md_converter.convert(md_folder, output_directory="converted")
+
+    def test_local_to_remote(self):
+        adapter = LocalFileAdapter()
+        md_converter = MdImageConverter(adapter=adapter)
+        md_folder = MdFolder(name="mds")
+        md_converter.convert(md_folder, output_directory="local_mds")
+
+        adapter = AliyunAdapter()
+        md_converter = MdImageConverter(adapter=adapter)
+        md_folder = MdFolder(name="local_mds", image_type="local", image_directory="local_mds/images")
+        md_converter.convert(md_folder, output_directory="aliyun_converted")

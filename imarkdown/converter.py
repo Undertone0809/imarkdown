@@ -120,9 +120,9 @@ class BaseMdImageConverter(BaseModel):
     def set_image_local_storage_directory(self, path: str):
         result = supplementary_file_path(path)
         logger.debug(
-            f"[imarkdown] BaseMdImageConverter image_local_storage_directory: {result}"
+            f"[imarkdown] BaseMdImageConverter set image_local_storage_directory: {result}"
         )
-        self.image_local_storage_directory = path
+        self.image_local_storage_directory = result
 
     def set_converted_md_file_name(
         self,
