@@ -1,5 +1,7 @@
 tests/converted
 tests/test_converted.md
+tests/local_mds/
+tests/aliyun_converted
 command
 md/
 images/

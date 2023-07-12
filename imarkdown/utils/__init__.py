@@ -41,7 +41,7 @@ def get_file_name_from_relative_path(relative_path: str) -> str:
             relative_path = relative_path[3:]
     elif relative_path.startswith("./"):
         relative_path = relative_path[2:]
-    return relative_path
+    return relative_path.split("/")[-1]
 
 
 def convert_backslashes(path):

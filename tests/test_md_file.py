@@ -51,17 +51,10 @@ class TestMdFile(TestCase):
         )
         logger.info(md_folder.__dict__)
 
-        md_folder = MdFolder(name="single_mds")
-        md_folder.update_config(output_directory="converted")
-        logger.info(md_folder.output_directory)
-        logger.info(md_folder.image_directory)
-
 
 class TestMdMediumManager(TestCase):
     def test_get_all_files(self):
-        md_folder = MdFolder(name="mds", image_directory="mds/img")
         manager = MdMediumManager()
-
         md_folder = MdFolder(name="single_mds", output_directory="converted")
         md_files: List[MdFile] = manager.init_md_files([md_folder])
         for md_file in md_files:
