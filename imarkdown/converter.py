@@ -37,7 +37,7 @@ def _write_data(new_file_path: str, md_str: str):
 
     with open(f"{new_file_path}", "w", encoding="utf-8") as f:
         f.write(md_str)
-        logger.info(f"write successfully to {new_file_path}")
+        logger.info(f"[imarkdown] write successfully to <{new_file_path}>")
 
 
 def _download_img(image_local_storage_directory: str, image_url: str) -> Optional[str]:
@@ -128,6 +128,7 @@ class BaseMdImageConverter(BaseModel):
         self,
         md_file_path: str,
         enable_rename: bool = True,
+        new_name: str = "",
         name_prefix: str = "",
         name_suffix: str = "_converted",
         **kwargs,
@@ -135,16 +136,22 @@ class BaseMdImageConverter(BaseModel):
         """Set converted markdown file name.
 
         Args:
-            md_file_path: original markdown file path
+            md_file_path: Original markdown file path.
             enable_rename: Default is true, it means the generated markdown file will receive a new name.
-            name_prefix: prefix name of generated markdown file
-            name_suffix: suffix name of generated markdown file
+            new_name: Custom converted markdown file name. If you pass it, you can not use name_prefix and name_suffix/
+            name_prefix: Prefix name of generated markdown file.
+            name_suffix: Suffix name of generated markdown file.
         """
         md_file_path = supplementary_file_path(md_file_path)
         md_name = md_file_path.split("/")[-1][:-3]
 
         if enable_rename:
-            self.converted_md_file_name = f"{name_prefix}{md_name}{name_suffix}.md"
+            if new_name != "":
+                if name_prefix or name_prefix:
+                    raise ValueError("You can not set `name_prefix` and `name_prefix` if you set `new_name`.")
+                self.converted_md_file_name = new_name
+            else:
+                self.converted_md_file_name = f"{name_prefix}{md_name}{name_suffix}.md"
             logger.debug(
                 f"[imarkdown] BaseMdImageConverter set converted_md_file_name {self.converted_md_file_name}"
             )
@@ -265,12 +272,16 @@ class BaseMdImageConverter(BaseModel):
         if not self.enable_save_images:
             os.remove(converted_image_path)
         if not converted_url:
-            raise Exception(f"<{original_image_url}> try to get new url but return None.")
+            raise Exception(
+                f"<{original_image_url}> try to get new url but return None."
+            )
         return converted_url
 
 
 class MdImageConverter:
-    def __init__(self, adapter: Optional[BaseMdAdapter] = None):
+    def __init__(
+        self, adapter: Optional[BaseMdAdapter] = None, enable_log: bool = True
+    ):
         self.adapter = _load_default_adapter()
         if adapter:
             self.adapter: BaseMdAdapter = adapter
@@ -280,6 +291,8 @@ class MdImageConverter:
             adapter=self.adapter
         )
         self.md_medium_manager: Optional[MdMediumManager] = MdMediumManager()
+        if enable_log:
+            logging.basicConfig(level=logging.INFO)
 
     def convert(
         self,
