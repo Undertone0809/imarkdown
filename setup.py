@@ -27,12 +27,13 @@ setuptools.setup(
     description="A practical Markdown image url converter",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Undertone0809/md-img-converter",
+    url="https://github.com/Undertone0809/imarkdown",
     packages=setuptools.find_packages(),
     install_requires=[
         "requests",
         "pydantic==1.10.0",
         "cushy-storage"
+
     ],
     license="Apache 2.0",
     classifiers=[
