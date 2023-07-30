@@ -55,7 +55,7 @@ def _download_img(image_local_storage_directory: str, image_url: str) -> Optiona
         now_time = time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time()))
         image_local_storage_directory = polish_path(image_local_storage_directory)
         if not os.path.exists(image_local_storage_directory):
-            os.mkdir(image_local_storage_directory)
+            os.makedirs(image_local_storage_directory, exist_ok=True)
 
         images_path = f"{image_local_storage_directory}{now_time}{random.randint(1000, 10000)}.png"
         with open(images_path, "wb") as f:
@@ -148,7 +148,9 @@ class BaseMdImageConverter(BaseModel):
         if enable_rename:
             if new_name != "":
                 if name_prefix or name_prefix:
-                    raise ValueError("You can not set `name_prefix` and `name_prefix` if you set `new_name`.")
+                    raise ValueError(
+                        "You can not set `name_prefix` and `name_prefix` if you set `new_name`."
+                    )
                 self.converted_md_file_name = new_name
             else:
                 self.converted_md_file_name = f"{name_prefix}{md_name}{name_suffix}.md"
@@ -220,18 +222,26 @@ class BaseMdImageConverter(BaseModel):
         Returns:
             Markdown data for the image url has been changed.
         """
-        images = list(
-            map(
-                lambda item: item[1],
-                re.findall(
-                    r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>", md_str
-                ),
-            )
+        _images = re.findall(
+            r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>", md_str
         )
+
+        images = []
+        for image in _images:
+            if image[1] == "":
+                continue
+            # If current image link is local path URL and you need to web URL to a local path,
+            # the local path url will not be converted.
+            if not self.is_local_images and not image[1].startswith("http"):
+                continue
+            images.append(image[1])
 
         for image in images:
             converted_image_url = self._get_converted_image_url(image)
             md_str = md_str.replace(image, converted_image_url)
+        logger.info(
+            f"[imarkdown] All images conversion for this md file have been completed, ready to save to file."
+        )
         return md_str
 
     def _get_converted_image_url(self, original_image_url: str) -> str:
