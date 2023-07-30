@@ -65,6 +65,7 @@ class MdFile(BaseMdMedium):
             values["name"][-3:] == ".md"
         ), f'<{values["name"][-3:]}> is not markdown file.'
 
+        values["name"] = values["absolute_path_name"].split("/")[-1]
         values["absolute_path"] = "/".join(values["absolute_path_name"].split("/")[:-1])
         if "image_type" in values and values["image_type"] == "local":
             assert (
@@ -75,7 +76,6 @@ class MdFile(BaseMdMedium):
             )
             values["is_default_image_directory"] = False
         else:
-            # set default image_directory if image_type == remote
             if "image_directory" not in values or not values["image_directory"]:
                 values["image_directory"] = f"{values['absolute_path']}/images"
                 values["is_default_image_directory"] = True
@@ -98,7 +98,7 @@ class MdFile(BaseMdMedium):
     @property
     def to_convert_params(self) -> Dict[str, Any]:
         params = {
-            "md_file_path": self.name,
+            "md_file_path": self.absolute_path_name,
             "enable_rename": self.enable_rename,
             "output_md_directory": self.output_directory,
             "image_local_storage_directory": self.image_directory,
@@ -199,6 +199,7 @@ class MdMediumManager(BaseModel):
         output_directory: Optional[str] = None,
         enable_save_images: bool = True,
     ):
+        """Update every md_file basic parameters."""
         if not self._md_files:
             ValueError("Please run generate_md_files firstly.")
         for md_file in self._md_files:
@@ -215,6 +216,15 @@ class MdMediumManager(BaseModel):
         self,
         md_mediums: List[Union[MdFile, MdFolder]],
     ) -> List[MdFile]:
+        """MdFolder may contain several MdFile.This method can convert all
+        MdFolders and MdFiles to MdFiles list.
+
+        Args:
+            md_mediums(List[Union[MdFile, MdFolder]]): a list of MdFile and MdFolder
+
+        Returns:
+            A list of all MdFile.
+        """
         def find_sub_files(md_folder: MdFolder):
             for sub_node in md_folder.sub_nodes:
                 if isinstance(sub_node, MdFile):
