@@ -270,6 +270,30 @@ if __name__ == "__main__":
     main()
 ```
 
+### 自定义正则表达式
+
+`imarkdown`是使用正则表达式对image的url进行识别，当前支持`![](image_url)`和`<img src="image_url"/>`两种图片url的格式，当然，如果你的图片url很奇怪，有的时候`imarkdown`默认的正则表达式也无法识别出来。
+
+这个时候，你可以自定义一个可以识别你的图片的正则表达式，传入`imarkdown`进行识别，下面的示例展示了怎么使用自定义的正则表达式来识别图片。
+
+```python
+from imarkdown import MdImageConverter, LocalFileAdapter, MdFolder
+
+
+def main():
+    custom_re = r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>"
+    adapter = LocalFileAdapter()
+    md_converter = MdImageConverter(adapter=adapter)
+    
+    md_folder = MdFolder(name="mds")
+    md_converter.convert(md_folder, output_directory="output_mds", re_rule=custom_re)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+
 ## 开发计划
 
 - [ ] 添加客户端支持
@@ -282,6 +306,8 @@ if __name__ == "__main__":
 - [ ] 提供文件自定义命名
 - [ ] 提供图片自定义格式化命名方式
 - [ ] 构建PDF转换器
+- [ ] 提供markdown其他元素的替换
+
 
 ## FAQ
 

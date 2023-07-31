@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class BaseMdMedium(BaseModel):
     name: str
     """markdown medium name"""
-    absolute_path_name: str
+    absolute_path_name: str = ""
     """path + name"""
     image_directory: Optional[str] = None
     """image storage path if it exists"""
@@ -32,7 +32,7 @@ class BaseMdMedium(BaseModel):
 
 
 class MdFile(BaseMdMedium):
-    absolute_path: str
+    absolute_path: str = ""
     """absolute path of markdown file"""
 
     def update_config(self, **kwargs):

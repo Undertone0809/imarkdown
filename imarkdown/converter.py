@@ -89,6 +89,9 @@ class BaseMdImageConverter(BaseModel):
     md_file_output_directory: Optional[str] = None
     """The storage directory of converted markdown file."""
     converted_md_file_name: Optional[str] = None
+    """The converted markdown file name."""
+    re_rule: str = r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>"
+    """Default regular expression to find images, you can custom re_rule."""
 
     @root_validator(pre=True)
     def variables_check(
@@ -167,6 +170,7 @@ class BaseMdImageConverter(BaseModel):
         image_local_storage_directory: Optional[str] = None,
         output_md_directory: Optional[str] = None,
         is_local_images: Optional[bool] = None,
+        re_rule: Optional[str] = None,
         **kwargs,
     ):
         """Convert Markdown image url and generate a new Markdown file.
@@ -176,7 +180,8 @@ class BaseMdImageConverter(BaseModel):
             image_local_storage_directory(Optional[str]): Specified image storage path. You can pass an absolute or a
                 relative path. Default image directory path is the Markdown directory named `markdown_dir/images`.
             output_md_directory(Optional[str]): The storage directory of converted markdown file.
-            is_local_images:
+            re_rule(Optional[str]): Regular expression to find images, you can custom re_rule.
+            is_local_images: It is a local images.
             **kwargs:
                 enable_rename(bool): Default is true, it means the generated markdown file will receive a new name.
                 name_prefix(Optional[str]): Prefix name of generated markdown file.
@@ -189,6 +194,9 @@ class BaseMdImageConverter(BaseModel):
             return
         if is_local_images:
             self.is_local_images = is_local_images
+        if re_rule:
+            logger.debug(f"[imarkdown] reset regular expression <{re_rule}>")
+            self.re_rule = re_rule
 
         self.set_converted_md_file_name(md_file_path, **kwargs)
         self.set_md_file_original_directory(md_file_path)
@@ -212,7 +220,7 @@ class BaseMdImageConverter(BaseModel):
         _write_data(converted_md_path, modified_data)
         logger.info(f"[imarkdown] <{md_file_path}> converted task end")
 
-    def _find_img_and_replace(self, md_str: str) -> str:
+    def _find_img_and_replace(self, md_str: str, re_rule: Optional[str] = None) -> str:
         """Input original markdown str and replace images address
         It can find `[]()` type image url and `<img/>` type image url
 
@@ -223,7 +231,7 @@ class BaseMdImageConverter(BaseModel):
             Markdown data for the image url has been changed.
         """
         _images = re.findall(
-            r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>", md_str
+            self.re_rule, md_str
         )
 
         images = []
@@ -311,6 +319,15 @@ class MdImageConverter:
         enable_save_images: bool = True,
         **kwargs,
     ):
+        """Markdown Image convert.
+
+        Args:
+            mediums(Union[MdFile, MdFolder, List[Union[MdFile, MdFolder]]]): MdFile or MdFolder you need to convert.
+            output_directory(Optional[str]): output directory
+            enable_save_images(bool): It is save image?
+            **kwargs:
+                re_rule(Optional[str]): custom regular expression to find specified element like image.
+        """
         def check_warning(medium: Union[MdFile, MdFolder]):
             if not output_directory and isinstance(medium, MdFolder):
                 raise ValueError(

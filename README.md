@@ -269,6 +269,28 @@ if __name__ == "__main__":
     main()
 ```
 
+### Custom Regular Expression
+`imarkdown` use regular expression to find your images. It supports `![](image_url)` and `<img src="image_url"/>` format, but there are still some other format `imarkdown` can not find it.
+
+At this point, `imarkdown` supports custom regular expression to address this issue. You can customize a regular expression which can find your markdown image url and pass it to MdImageConverter. The following example show how to use it.
+
+```python
+from imarkdown import MdImageConverter, LocalFileAdapter, MdFolder
+
+
+def main():
+    custom_re = r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>"
+    adapter = LocalFileAdapter()
+    md_converter = MdImageConverter(adapter=adapter)
+    
+    md_folder = MdFolder(name="mds")
+    md_converter.convert(md_folder, output_directory="output_mds", re_rule=custom_re)
+
+
+if __name__ == "__main__":
+    main()
+```
+
 ## Roadmap
 
 - [ ] Add client-side support
