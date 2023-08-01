@@ -16,6 +16,7 @@
 - 批量转换：支持单、多文件的批量转换，以及生成文件的格式化重命名等操作
 - 高度自定义： 只需要继承一个MdAdapter，就可以轻松实现自定义图床的url转换
 - 图床适配： 当前暂时只支持阿里云图床，欢迎pr提供更多类型图床
+- 自定义识别格式： 通过ElementFinder，用户可以自定义元素（如图片地址）的查找方式，以满足特殊元素识别的需求。
 
 ## 适用人群
 
@@ -270,29 +271,40 @@ if __name__ == "__main__":
     main()
 ```
 
-### 自定义正则表达式
+### 自定义元素查找器
 
-`imarkdown`是使用正则表达式对image的url进行识别，当前支持`![](image_url)`和`<img src="image_url"/>`两种图片url的格式，当然，如果你的图片url很奇怪，有的时候`imarkdown`默认的正则表达式也无法识别出来。
+`imarkdown`使用正则表达式元素查找器`ReElementFinder`对image的url进行识别，其表达式当前支持`![](image_url)`和`<img src="image_url"/>`两种图片url的格式的识别，当然，如果你的图片url很奇怪，有的时候`imarkdown`默认的正则表达式也无法识别出来。
 
-这个时候，你可以自定义一个可以识别你的图片的正则表达式，传入`imarkdown`进行识别，下面的示例展示了怎么使用自定义的正则表达式来识别图片。
+这个时候，你可以自定义一个元素查找器`CustomElementFinder`，通过自定义正则表达式或者其他的识别方式，从而定制化的识别到你需要识别的内容，用于传递给MdImageConverter进行元素替换。下面的示例展示了怎么使用自定义的`ElementFinder`来识别图片链接。
 
 ```python
-from imarkdown import MdImageConverter, LocalFileAdapter, MdFolder
+import re
+from typing import List
+
+from imarkdown import BaseElementFinder, MdFile, MdImageConverter, LocalFileAdapter
+
+
+class CustomElementFinder(BaseElementFinder):
+    def find_all_elements(self, md_str) -> List[str]:
+        re_rule: str = r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>"
+        images = re.findall(re_rule, md_str)
+        return list(map(lambda item: item[1], images))
 
 
 def main():
-    custom_re = r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>"
     adapter = LocalFileAdapter()
-    md_converter = MdImageConverter(adapter=adapter)
-    
-    md_folder = MdFolder(name="mds")
-    md_converter.convert(md_folder, output_directory="output_mds", re_rule=custom_re)
+    converter = MdImageConverter(adapter=adapter)
+    element_finder = CustomElementFinder()
+
+    md_file = MdFile(name="test.md")
+    converter.convert(md_file, element_finder=element_finder)
 
 
 if __name__ == "__main__":
     main()
 ```
 
+在这个示例中，`CustomElementFinder`需要继承`BaseElementFinder`，并且实现`find_all_elements`函数，并实现特定的查找逻辑，将从markdown中找到的所有元素（如所有图片的url）构建成一个数组返回给`MdImageConverter`，用于元素替换。
 
 ## 开发计划
 
@@ -306,7 +318,7 @@ if __name__ == "__main__":
 - [ ] 提供文件自定义命名
 - [ ] 提供图片自定义格式化命名方式
 - [ ] 构建PDF转换器
-- [ ] 提供markdown其他元素的替换
+- [x] 提供markdown其他元素的替换
 
 
 ## FAQ

@@ -16,6 +16,7 @@
 - Batch Conversion: It supports batch conversion of single or multiple files, as well as formatting and renaming of generated files.
 - Highly Customizable: By inheriting the `MdAdapter` class, you can easily implement custom URL conversion for different image servers.
 - Image Server Adapters: Currently, only Aliyun OSS is supported as an image server. Contributions are welcome to add support for more types of image servers.
+- Custom recognition format: With ElementFinder, users can customize the search method for elements (such as image addresses) to meet the needs of special element recognition.
 
 ## Target Audience
 
@@ -270,26 +271,39 @@ if __name__ == "__main__":
 ```
 
 ### Custom Regular Expression
-`imarkdown` use regular expression to find your images. It supports `![](image_url)` and `<img src="image_url"/>` format, but there are still some other format `imarkdown` can not find it.
 
-At this point, `imarkdown` supports custom regular expression to address this issue. You can customize a regular expression which can find your markdown image url and pass it to MdImageConverter. The following example show how to use it.
+`imarkdown` uses the regular expression element finder `ReElementFinder` to recognize the URL of an image, the finder currently supports `![](image_url)` and `<img src="image_url"/>` are two types of image URL format recognition. Of course, if your image URL is strange, sometimes the default regular expression for `imarkdown` cannot be recognized.
+
+At this point, you can customize an element finder called `CustomElementFinder`, which can recognize the content you need to recognize through custom regular expressions or other recognition methods, and use it to pass it to MdImageConverter for element replacement. The following example shows how to use a custom `ElementFinder` to identify image links.
 
 ```python
-from imarkdown import MdImageConverter, LocalFileAdapter, MdFolder
+import re
+from typing import List
+
+from imarkdown import BaseElementFinder, MdFile, MdImageConverter, LocalFileAdapter
+
+
+class CustomElementFinder(BaseElementFinder):
+    def find_all_elements(self, md_str) -> List[str]:
+        re_rule: str = r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>"
+        images = re.findall(re_rule, md_str)
+        return list(map(lambda item: item[1], images))
 
 
 def main():
-    custom_re = r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>"
     adapter = LocalFileAdapter()
-    md_converter = MdImageConverter(adapter=adapter)
-    
-    md_folder = MdFolder(name="mds")
-    md_converter.convert(md_folder, output_directory="output_mds", re_rule=custom_re)
+    converter = MdImageConverter(adapter=adapter)
+    element_finder = CustomElementFinder()
+
+    md_file = MdFile(name="test.md")
+    converter.convert(md_file, element_finder=element_finder)
 
 
 if __name__ == "__main__":
     main()
 ```
+
+In this example, `CustomElementFinder` needs to inherit from `BaseElementFinder` and implement `find_all_elements()` function and implements specific search logic to construct an array of all elements found in the markdown (such as the urls of all images) and return it to `MdImageConverter`.
 
 ## Roadmap
 

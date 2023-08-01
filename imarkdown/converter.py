@@ -4,6 +4,7 @@ import random
 import re
 import time
 import traceback
+from abc import abstractmethod
 from typing import List, Optional, Any, Union, Dict
 
 import requests
@@ -73,6 +74,27 @@ def _load_default_adapter() -> BaseMdAdapter:
     return MdAdapterMapper[cfg.last_adapter_name]()
 
 
+class BaseElementFinder:
+    """Element Finder can find all specified elements(like images) in markdown file. ReElementFinder use
+    regular expression to find element."""
+
+    @abstractmethod
+    def find_all_elements(self, md_str: str) -> List[str]:
+        """Find all elements(images) and return them."""
+
+
+class ReElementFinder(BaseElementFinder):
+    def __init__(
+        self, re_rule: str = r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>"
+    ):
+        self.re_rule = re_rule
+        """Default regular expression to find images, you can custom re_rule."""
+
+    def find_all_elements(self, md_str: str) -> List[str]:
+        elements = re.findall(self.re_rule, md_str)
+        return list(map(lambda item: item[1], elements))
+
+
 class BaseMdImageConverter(BaseModel):
     adapter: BaseMdAdapter = Field(default_factory=_load_default_adapter)
     """Adapter determines the convert method you choose."""
@@ -90,8 +112,11 @@ class BaseMdImageConverter(BaseModel):
     """The storage directory of converted markdown file."""
     converted_md_file_name: Optional[str] = None
     """The converted markdown file name."""
-    re_rule: str = r"(?:!\[(.*?)\]\((.*?)\))|<img.*?src=[\'\"](.*?)[\'\"].*?>"
-    """Default regular expression to find images, you can custom re_rule."""
+    element_finder: BaseElementFinder = Field(default=ReElementFinder())
+    """Element Finder can find all specified elements(like images) in markdown file."""
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @root_validator(pre=True)
     def variables_check(
@@ -170,7 +195,7 @@ class BaseMdImageConverter(BaseModel):
         image_local_storage_directory: Optional[str] = None,
         output_md_directory: Optional[str] = None,
         is_local_images: Optional[bool] = None,
-        re_rule: Optional[str] = None,
+        element_finder: Optional[BaseElementFinder] = None,
         **kwargs,
     ):
         """Convert Markdown image url and generate a new Markdown file.
@@ -180,8 +205,8 @@ class BaseMdImageConverter(BaseModel):
             image_local_storage_directory(Optional[str]): Specified image storage path. You can pass an absolute or a
                 relative path. Default image directory path is the Markdown directory named `markdown_dir/images`.
             output_md_directory(Optional[str]): The storage directory of converted markdown file.
-            re_rule(Optional[str]): Regular expression to find images, you can custom re_rule.
             is_local_images: It is a local images.
+            element_finder: Element Finder can find all specified elements(like images) in markdown file.
             **kwargs:
                 enable_rename(bool): Default is true, it means the generated markdown file will receive a new name.
                 name_prefix(Optional[str]): Prefix name of generated markdown file.
@@ -194,9 +219,8 @@ class BaseMdImageConverter(BaseModel):
             return
         if is_local_images:
             self.is_local_images = is_local_images
-        if re_rule:
-            logger.debug(f"[imarkdown] reset regular expression <{re_rule}>")
-            self.re_rule = re_rule
+        if element_finder:
+            self.element_finder = element_finder
 
         self.set_converted_md_file_name(md_file_path, **kwargs)
         self.set_md_file_original_directory(md_file_path)
@@ -220,9 +244,9 @@ class BaseMdImageConverter(BaseModel):
         _write_data(converted_md_path, modified_data)
         logger.info(f"[imarkdown] <{md_file_path}> converted task end")
 
-    def _find_img_and_replace(self, md_str: str, re_rule: Optional[str] = None) -> str:
+    def _find_img_and_replace(self, md_str: str) -> str:
         """Input original markdown str and replace images address
-        It can find `[]()` type image url and `<img/>` type image url
+        It can find `![]()` type image url and `<img/>` type image url
 
         Args:
             md_str: markdown original data
@@ -230,19 +254,17 @@ class BaseMdImageConverter(BaseModel):
         Returns:
             Markdown data for the image url has been changed.
         """
-        _images = re.findall(
-            self.re_rule, md_str
-        )
+        _images = self.element_finder.find_all_elements(md_str)
 
         images = []
         for image in _images:
-            if image[1] == "":
+            if image == "":
                 continue
             # If current image link is local path URL and you need to web URL to a local path,
             # the local path url will not be converted.
-            if not self.is_local_images and not image[1].startswith("http"):
+            if not self.is_local_images and not image.startswith("http"):
                 continue
-            images.append(image[1])
+            images.append(image)
 
         for image in images:
             converted_image_url = self._get_converted_image_url(image)
@@ -328,6 +350,7 @@ class MdImageConverter:
             **kwargs:
                 re_rule(Optional[str]): custom regular expression to find specified element like image.
         """
+
         def check_warning(medium: Union[MdFile, MdFolder]):
             if not output_directory and isinstance(medium, MdFolder):
                 raise ValueError(
