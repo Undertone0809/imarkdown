@@ -204,7 +204,14 @@ The following example demonstrates a solution for batch conversion of multiple M
 from imarkdown import LocalFileAdapter, MdFolder, MdImageConverter
 
 def main():
-    adapter = LocalFileAdapter()
+    aliyun_config = {
+        "access_key_id": "key_id",
+        "access_key_secret": "key_secret",
+        "bucket_name": "bucket_name",
+        "place": "bucket_place",
+        "storage_path_prefix": "prefix",
+    }
+    adapter = AliyunAdapter(**aliyun_config)
     converter = MdImageConverter(adapter=adapter)
     
     # Folder name is "local_mds", images are of local type, and image URLs are saved in "local_mds/images"
