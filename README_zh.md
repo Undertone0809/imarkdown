@@ -205,7 +205,14 @@ md_folder = MdFolder(name="mds", image_directory="mds/my_images")
 from imarkdown import LocalFileAdapter, MdFolder, MdImageConverter
 
 def main():
-    adapter = LocalFileAdapter()
+    aliyun_config = {
+        "access_key_id": "key_id",
+        "access_key_secret": "key_secret",
+        "bucket_name": "bucket_name",
+        "place": "bucket_place",
+        "storage_path_prefix": "prefix",
+    }
+    adapter = AliyunAdapter(**aliyun_config)
     converter = MdImageConverter(adapter=adapter)
     
     # 文件名为local_mds，图片为本地类型，图片链接保存在"local_mds/images"
