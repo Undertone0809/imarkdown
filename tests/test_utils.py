@@ -1,7 +1,7 @@
 import logging
 from unittest import TestCase
 
-from imarkdown.converter import supplementary_file_path, calculate_relative_path
+from imarkdown.converter import calculate_relative_path, supplementary_file_path
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

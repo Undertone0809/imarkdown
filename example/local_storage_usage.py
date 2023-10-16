@@ -1,4 +1,4 @@
-from imarkdown import MdImageConverter, LocalFileAdapter, MdFile
+from imarkdown import LocalFileAdapter, MdFile, MdImageConverter
 
 
 def main():

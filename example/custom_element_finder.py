@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-from imarkdown import BaseElementFinder, MdFile, MdImageConverter, LocalFileAdapter
+from imarkdown import BaseElementFinder, LocalFileAdapter, MdFile, MdImageConverter
 
 
 class CustomElementFinder(BaseElementFinder):

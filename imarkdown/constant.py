@@ -9,5 +9,5 @@ class MdAdapterType(str, Enum):
 
 _MdAdapterType: Dict[str, str] = {
     MdAdapterType.Local: MdAdapterType.Local,
-    MdAdapterType.Aliyun: MdAdapterType.Aliyun
+    MdAdapterType.Aliyun: MdAdapterType.Aliyun,
 }
