@@ -1,15 +1,15 @@
 import glob
 import logging
 import os
-from typing import List, Optional, Any, Dict, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, root_validator, validator
 from typing_extensions import Literal
 
 from imarkdown.utils import (
-    supplementary_file_path,
     convert_backslashes,
     exist_markdown_file,
+    supplementary_file_path,
 )
 
 logger = logging.getLogger(__name__)
@@ -225,6 +225,7 @@ class MdMediumManager(BaseModel):
         Returns:
             A list of all MdFile.
         """
+
         def find_sub_files(md_folder: MdFolder):
             for sub_node in md_folder.sub_nodes:
                 if isinstance(sub_node, MdFile):

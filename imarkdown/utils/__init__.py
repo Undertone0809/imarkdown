@@ -50,6 +50,16 @@ def convert_backslashes(path):
 
 
 def calculate_relative_path(image_path, md_directory):
+    """
+    Calculate relative image path.
+
+    Args:
+        image_path: Absolute or relative image path.
+        md_directory: Absolute or relative markdown file path.
+
+    Returns:
+        Relative path of image compared to markdown file path.
+    """
     image_path = os.path.abspath(image_path)
     md_directory = os.path.abspath(md_directory)
 

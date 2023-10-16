@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from imarkdown.adapter import AliyunAdapter, LocalFileAdapter
 from imarkdown.constant import MdAdapterType
-from imarkdown.converter import MdImageConverter, BaseMdImageConverter
+from imarkdown.converter import BaseMdImageConverter, MdImageConverter
 from imarkdown.schema import MdFile, MdFolder
 
 logging.basicConfig(level=logging.DEBUG)
@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 class TestBaseImageConverter(TestCase):
     def test_base_usage(self):
-        # adapter = LocalFileAdapter()
-        adapter = AliyunAdapter()
+        adapter = LocalFileAdapter()
+        # adapter = AliyunAdapter()
         converter = BaseMdImageConverter(adapter=adapter)
         converter.convert(
             "test.md",

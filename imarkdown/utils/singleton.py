@@ -36,6 +36,7 @@ class SingletonPool(metaclass=Singleton):
 
 def singleton():
     """singleton decorator"""
+
     def decorator(cls):
         singleton_pool = SingletonPool()
 

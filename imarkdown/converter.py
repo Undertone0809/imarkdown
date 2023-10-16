@@ -5,7 +5,7 @@ import re
 import time
 import traceback
 from abc import abstractmethod
-from typing import List, Optional, Any, Union, Dict
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 from pydantic import BaseModel, Field, root_validator
@@ -13,12 +13,12 @@ from pydantic import BaseModel, Field, root_validator
 from imarkdown.adapter import BaseMdAdapter, MdAdapterMapper
 from imarkdown.config import IMarkdownConfig
 from imarkdown.constant import MdAdapterType
-from imarkdown.schema import MdMediumManager, MdFile, MdFolder
+from imarkdown.schema import MdFile, MdFolder, MdMediumManager
 from imarkdown.utils import (
+    calculate_relative_path,
+    get_file_name_from_relative_path,
     polish_path,
     supplementary_file_path,
-    get_file_name_from_relative_path,
-    calculate_relative_path,
 )
 
 logger = logging.getLogger(__name__)

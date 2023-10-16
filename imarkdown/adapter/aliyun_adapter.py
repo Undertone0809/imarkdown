@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Any, Dict
+from typing import Any, Dict, Optional
 
 from pydantic import root_validator
 
@@ -31,6 +31,7 @@ class AliyunAdapter(BaseMdAdapter):
 
     @root_validator(pre=True)
     def validate_environment(cls, values: Optional[Dict]) -> Dict:
+        # update adapter config to cache
         env_config: Dict[str, Any] = cfg.load_variable(cls.__name__)
         if env_config:
             if not values:

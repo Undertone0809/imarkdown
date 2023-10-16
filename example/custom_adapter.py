@@ -1,4 +1,4 @@
-from imarkdown import MdImageConverter, BaseMdAdapter, MdFile
+from imarkdown import BaseMdAdapter, MdFile, MdImageConverter
 
 
 class CustomMdAdapter(BaseMdAdapter):

@@ -21,7 +21,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setuptools.setup(
     name="imarkdown",
-    version="1.2.1",
+    version="1.2.3",
     author="Zeeland",
     author_email="zeeland@foxmail.com",
     description="A practical Markdown image url converter",
@@ -33,7 +33,7 @@ setuptools.setup(
         "requests",
         "pydantic~=1.10.0",
         "cushy-storage",
-        'broadcast-service==1.3.2',
+        "broadcast-service==1.3.2",
     ],
     license="Apache 2.0",
     classifiers=[

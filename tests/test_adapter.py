@@ -2,7 +2,7 @@ import logging
 from unittest import TestCase
 
 from imarkdown.adapter import AliyunAdapter, LocalFileAdapter
-from imarkdown.converter import MdImageConverter, MdFile, MdFolder
+from imarkdown.converter import MdFile, MdFolder, MdImageConverter
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -67,5 +67,7 @@ class TestAliyunAdapter(TestCase):
 
         adapter = AliyunAdapter()
         md_converter = MdImageConverter(adapter=adapter)
-        md_folder = MdFolder(name="local_mds", image_type="local", image_directory="local_mds/images")
+        md_folder = MdFolder(
+            name="local_mds", image_type="local", image_directory="local_mds/images"
+        )
         md_converter.convert(md_folder, output_directory="aliyun_converted")

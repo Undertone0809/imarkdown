@@ -1,4 +1,4 @@
-from imarkdown import MdImageConverter, AliyunAdapter, MdFile
+from imarkdown import AliyunAdapter, MdFile, MdImageConverter
 
 
 def main():
